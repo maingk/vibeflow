@@ -42,6 +42,13 @@ export function useTodos() {
     [setTodos]
   );
 
+  const restoreTodo = useCallback(
+    (todo: TodoItem) => {
+      setTodos((prev) => [...prev, todo]);
+    },
+    [setTodos]
+  );
+
   const clearCompleted = useCallback(() => {
     setTodos((prev) => prev.filter((todo) => !todo.completed));
   }, [setTodos]);
@@ -52,6 +59,7 @@ export function useTodos() {
     addTodo,
     toggleTodo,
     deleteTodo,
+    restoreTodo,
     clearCompleted,
   };
 }

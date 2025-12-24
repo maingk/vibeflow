@@ -1,5 +1,7 @@
 export type ColumnId = "todo" | "inProgress" | "complete";
 
+export type Priority = "low" | "medium" | "high";
+
 export interface KanbanCard {
   id: string;
   title: string;
@@ -7,12 +9,16 @@ export interface KanbanCard {
   column: ColumnId;
   order: number;
   createdAt: number;
+  priority?: Priority;
+  tags?: string[];
+  dueDate?: number;
 }
 
 export interface TodoItem {
   id: string;
   text: string;
   completed: boolean;
+  dueDate?: number;
 }
 
 export interface Column {

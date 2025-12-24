@@ -13,7 +13,7 @@ export function useKanban() {
   );
 
   const addCard = useCallback(
-    (title: string, description: string, column: ColumnId = "todo") => {
+    (title: string, description: string, column: ColumnId = "todo", priority?: KanbanCard["priority"], dueDate?: number) => {
       const newCard: KanbanCard = {
         id: crypto.randomUUID(),
         title,
@@ -21,6 +21,8 @@ export function useKanban() {
         column,
         order: Date.now(),
         createdAt: Date.now(),
+        priority,
+        dueDate,
       };
       setCards((prev) => [...prev, newCard]);
     },
@@ -56,6 +58,30 @@ export function useKanban() {
     [setCards]
   );
 
+  const restoreCard = useCallback(
+    (card: KanbanCard) => {
+      setCards((prev) => [...prev, card]);
+    },
+    [setCards]
+  );
+
+  const duplicateCard = useCallback(
+    (id: string) => {
+      const cardToDuplicate = cards.find((c) => c.id === id);
+      if (!cardToDuplicate) return;
+
+      const duplicatedCard: KanbanCard = {
+        ...cardToDuplicate,
+        id: crypto.randomUUID(),
+        title: `${cardToDuplicate.title} (copy)`,
+        createdAt: Date.now(),
+        order: Date.now(),
+      };
+      setCards((prev) => [...prev, duplicatedCard]);
+    },
+    [cards, setCards]
+  );
+
   const getCardsByColumn = useCallback(
     (columnId: ColumnId) => {
       return cards
@@ -71,6 +97,8 @@ export function useKanban() {
     addCard,
     updateCard,
     deleteCard,
+    restoreCard,
+    duplicateCard,
     moveCard,
     getCardsByColumn,
   };

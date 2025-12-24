@@ -40,7 +40,7 @@ export function NotesPanel() {
         onChange={(e) => handleChange(e.target.value)}
         onBlur={handleBlur}
         placeholder="Jot down ideas, reminders, or anything else..."
-        className="flex-1 w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary/50 focus:outline-none focus:border-accent transition-colors resize-none"
+        className="flex-1 w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary/50 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/50 transition-colors resize-none"
       />
     </div>
   );
