@@ -259,7 +259,7 @@ export function KanbanBoard({ addCardTriggerRef, searchFocusRef }: Props) {
         <DragOverlay>
           {activeCard && (
             <div className="rotate-3">
-              <KanbanCard card={activeCard} onDelete={() => {}} />
+              <KanbanCard card={activeCard} onDelete={() => {}} onDuplicate={() => {}} />
             </div>
           )}
         </DragOverlay>
