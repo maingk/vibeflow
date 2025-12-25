@@ -1,25 +1,91 @@
 "use client";
 
-import { useCallback, useRef, useEffect } from "react";
-import { useLocalStorage } from "./useLocalStorage";
+import { useCallback, useRef, useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
-const STORAGE_KEY = "vibeflow-notes";
 const DEBOUNCE_MS = 500;
+const NOTES_ID = "main-notes"; // Single notes document
+
+interface Note {
+  id: string;
+  title: string;
+  content: string;
+  created_at: number;
+  updated_at: number;
+}
 
 export function useNotes() {
-  const [notes, setNotes, isLoaded] = useLocalStorage<string>(STORAGE_KEY, "");
+  const [notes, setNotes] = useState<string>("");
+  const [isLoaded, setIsLoaded] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const noteIdRef = useRef<string>(NOTES_ID);
+
+  // Load notes from Supabase on mount
+  useEffect(() => {
+    async function loadNotes() {
+      const { data, error } = await supabase
+        .from("notes")
+        .select("*")
+        .eq("id", NOTES_ID)
+        .single();
+
+      if (error) {
+        if (error.code === "PGRST116") {
+          // No notes exist yet, create initial empty note
+          const now = Date.now();
+          await supabase.from("notes").insert({
+            id: NOTES_ID,
+            title: "Notes",
+            content: "",
+            created_at: now,
+            updated_at: now,
+          });
+          setNotes("");
+        } else {
+          console.error("Error loading notes:", error);
+        }
+        setIsLoaded(true);
+        return;
+      }
+
+      setNotes(data.content);
+      setIsLoaded(true);
+    }
+
+    loadNotes();
+  }, []);
+
+  const saveToDatabase = useCallback(async (value: string) => {
+    const now = Date.now();
+    const { error } = await supabase
+      .from("notes")
+      .upsert({
+        id: NOTES_ID,
+        title: "Notes",
+        content: value,
+        created_at: now,
+        updated_at: now,
+      })
+      .eq("id", NOTES_ID);
+
+    if (error) {
+      console.error("Error saving notes:", error);
+    }
+  }, []);
 
   const updateNotes = useCallback(
     (value: string) => {
+      setNotes(value);
+
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
+
       timeoutRef.current = setTimeout(() => {
-        setNotes(value);
+        saveToDatabase(value);
       }, DEBOUNCE_MS);
     },
-    [setNotes]
+    [saveToDatabase]
   );
 
   const updateNotesImmediate = useCallback(
@@ -28,8 +94,9 @@ export function useNotes() {
         clearTimeout(timeoutRef.current);
       }
       setNotes(value);
+      saveToDatabase(value);
     },
-    [setNotes]
+    [saveToDatabase]
   );
 
   useEffect(() => {
