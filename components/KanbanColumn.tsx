@@ -55,7 +55,7 @@ export function KanbanColumn({ column, cards, onDeleteCard, onDuplicateCard, onE
 
   return (
     <div
-      className={`flex flex-col flex-1 min-w-[280px] max-w-[340px] rounded-2xl glass p-4 transition-all duration-300 ${
+      className={`flex flex-col flex-1 min-w-[280px] rounded-2xl glass p-4 transition-all duration-300 ${
         isOver
           ? "border-2 border-[var(--gradient-cyan)] bg-[var(--gradient-cyan)]/5 scale-[1.02] shadow-xl"
           : "border border-border/30 hover:border-border/50"
