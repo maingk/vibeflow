@@ -36,11 +36,12 @@ interface Props {
   cards: KanbanCardType[];
   onDeleteCard: (id: string) => void;
   onDuplicateCard: (id: string) => void;
+  onEditCard: (id: string) => void;
   onAddCard: () => void;
   isOver: boolean;
 }
 
-export function KanbanColumn({ column, cards, onDeleteCard, onDuplicateCard, onAddCard, isOver }: Props) {
+export function KanbanColumn({ column, cards, onDeleteCard, onDuplicateCard, onEditCard, onAddCard, isOver }: Props) {
   const { setNodeRef } = useDroppable({
     id: column.id,
   });
@@ -50,42 +51,53 @@ export function KanbanColumn({ column, cards, onDeleteCard, onDuplicateCard, onA
   const lowPriorityCount = cards.filter((c) => c.priority === "low").length;
   const hasPriorities = highPriorityCount + mediumPriorityCount + lowPriorityCount > 0;
 
+  const Icon = columnIcons[column.id];
+
   return (
     <div
-      className={`flex flex-col flex-1 min-w-[240px] max-w-[320px] rounded-lg bg-surface/30 p-3 transition-colors ${
+      className={`flex flex-col flex-1 min-w-[280px] max-w-[340px] rounded-2xl glass p-4 transition-all duration-300 ${
         isOver
-          ? "border-2 border-accent bg-accent/10"
-          : "border border-border"
+          ? "border-2 border-[var(--gradient-cyan)] bg-[var(--gradient-cyan)]/5 scale-[1.02] shadow-xl"
+          : "border border-border/30 hover:border-border/50"
       }`}
     >
-      <div className="mb-3">
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-sm font-medium text-text-secondary uppercase tracking-wide">
-            {column.title}
-          </h2>
-          <span className="text-xs text-text-secondary bg-surface px-2 py-0.5 rounded">
+      <div className="mb-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <div className={`p-1.5 rounded-lg ${
+              column.id === 'todo' ? 'bg-[var(--gradient-cyan)]/10 text-[var(--gradient-cyan)]' :
+              column.id === 'inProgress' ? 'bg-[var(--gradient-magenta)]/10 text-[var(--gradient-magenta)]' :
+              'bg-[var(--gradient-orange)]/10 text-[var(--gradient-orange)]'
+            }`}>
+              <Icon size={16} />
+            </div>
+            <h2 className="text-xs font-bold text-text-primary uppercase tracking-widest font-mono">
+              {column.title}
+            </h2>
+          </div>
+          <span className="text-xs font-bold text-text-secondary bg-surface/50 px-2.5 py-1 rounded-lg font-mono border border-border/30">
             {cards.length}
           </span>
         </div>
 
         {/* Priority indicators */}
         {hasPriorities && cards.length > 0 && (
-          <div className="flex items-center gap-1 mt-1">
+          <div className="flex items-center gap-2">
             {highPriorityCount > 0 && (
-              <div className="flex items-center gap-0.5 text-xs text-red-400">
-                <Flag size={10} />
+              <div className="flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold text-[var(--gradient-orange)] bg-[var(--gradient-orange)]/10 border border-[var(--gradient-orange)]/20 font-mono">
+                <Flag size={11} />
                 <span>{highPriorityCount}</span>
               </div>
             )}
             {mediumPriorityCount > 0 && (
-              <div className="flex items-center gap-0.5 text-xs text-amber-400">
-                <Flag size={10} />
+              <div className="flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold text-[var(--gradient-magenta)] bg-[var(--gradient-magenta)]/10 border border-[var(--gradient-magenta)]/20 font-mono">
+                <Flag size={11} />
                 <span>{mediumPriorityCount}</span>
               </div>
             )}
             {lowPriorityCount > 0 && (
-              <div className="flex items-center gap-0.5 text-xs text-blue-400">
-                <Flag size={10} />
+              <div className="flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold text-[var(--gradient-cyan)] bg-[var(--gradient-cyan)]/10 border border-[var(--gradient-cyan)]/20 font-mono">
+                <Flag size={11} />
                 <span>{lowPriorityCount}</span>
               </div>
             )}
@@ -94,7 +106,7 @@ export function KanbanColumn({ column, cards, onDeleteCard, onDuplicateCard, onA
       </div>
       <div
         ref={setNodeRef}
-        className="flex-1 min-h-[200px] rounded-lg p-2"
+        className="flex-1 min-h-[200px] rounded-xl p-3"
       >
         <SortableContext
           items={cards.map((c) => c.id)}
@@ -115,19 +127,21 @@ export function KanbanColumn({ column, cards, onDeleteCard, onDuplicateCard, onA
               }
             />
           ) : (
-            <div className="flex flex-col gap-2">
-              {cards.map((card) => (
-                <KanbanCard key={card.id} card={card} onDelete={onDeleteCard} onDuplicate={onDuplicateCard} />
+            <div className="flex flex-col gap-3">
+              {cards.map((card, index) => (
+                <div key={card.id} style={{ animationDelay: `${index * 0.05}s` }}>
+                  <KanbanCard card={card} onDelete={onDeleteCard} onDuplicate={onDuplicateCard} onEdit={onEditCard} />
+                </div>
               ))}
             </div>
           )}
         </SortableContext>
         <button
           onClick={onAddCard}
-          className="w-full mt-2 p-2 flex items-center justify-center gap-2 text-sm text-text-secondary hover:text-text-primary hover:bg-surface rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-surface"
+          className="group w-full mt-3 p-3 flex items-center justify-center gap-2 text-sm font-semibold text-text-secondary hover:text-text-primary glass border border-border/30 hover:border-[var(--gradient-cyan)]/30 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[var(--gradient-cyan)] focus:ring-offset-2 focus:ring-offset-surface font-mono uppercase tracking-wide"
         >
-          <Plus size={16} />
-          <span>Add card</span>
+          <Plus size={16} className="group-hover:rotate-90 transition-transform duration-300" />
+          <span>Add Card</span>
         </button>
       </div>
     </div>

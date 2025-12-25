@@ -18,6 +18,7 @@ import { ArrowUpDown } from "lucide-react";
 import { KanbanColumn } from "./KanbanColumn";
 import { KanbanCard } from "./KanbanCard";
 import { AddCardModal } from "./AddCardModal";
+import { EditCardModal } from "./EditCardModal";
 import { SearchBar } from "./SearchBar";
 import { useKanban } from "@/hooks/useKanban";
 import { useToast } from "@/contexts/ToastContext";
@@ -31,11 +32,12 @@ interface Props {
 }
 
 export function KanbanBoard({ addCardTriggerRef, searchFocusRef }: Props) {
-  const { cards, isLoaded, addCard, deleteCard, restoreCard, duplicateCard, moveCard, getCardsByColumn } =
+  const { cards, isLoaded, addCard, updateCard, deleteCard, restoreCard, duplicateCard, moveCard, getCardsByColumn } =
     useKanban();
   const { addToast } = useToast();
   const [activeCard, setActiveCard] = useState<KanbanCardType | null>(null);
   const [addingToColumn, setAddingToColumn] = useState<ColumnId | null>(null);
+  const [editingCardId, setEditingCardId] = useState<string | null>(null);
   const [overColumn, setOverColumn] = useState<ColumnId | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("date");
@@ -166,6 +168,18 @@ export function KanbanBoard({ addCardTriggerRef, searchFocusRef }: Props) {
     });
   };
 
+  const handleEditCard = (id: string) => {
+    setEditingCardId(id);
+  };
+
+  const handleUpdateCard = (id: string, updates: Partial<KanbanCardType>) => {
+    updateCard(id, updates);
+    addToast({
+      message: "Card updated",
+      type: "success",
+    });
+  };
+
   const sortCards = (cardsToSort: KanbanCardType[]) => {
     const sorted = [...cardsToSort];
 
@@ -251,6 +265,7 @@ export function KanbanBoard({ addCardTriggerRef, searchFocusRef }: Props) {
               cards={getFilteredCardsByColumn(column.id)}
               onDeleteCard={handleDeleteCard}
               onDuplicateCard={handleDuplicateCard}
+              onEditCard={handleEditCard}
               onAddCard={() => setAddingToColumn(column.id)}
               isOver={overColumn === column.id}
             />
@@ -259,7 +274,7 @@ export function KanbanBoard({ addCardTriggerRef, searchFocusRef }: Props) {
         <DragOverlay>
           {activeCard && (
             <div className="rotate-3">
-              <KanbanCard card={activeCard} onDelete={() => {}} onDuplicate={() => {}} />
+              <KanbanCard card={activeCard} onDelete={() => {}} onDuplicate={() => {}} onEdit={() => {}} />
             </div>
           )}
         </DragOverlay>
@@ -270,6 +285,14 @@ export function KanbanBoard({ addCardTriggerRef, searchFocusRef }: Props) {
           column={addingToColumn}
           onAdd={addCard}
           onClose={() => setAddingToColumn(null)}
+        />
+      )}
+
+      {editingCardId && (
+        <EditCardModal
+          card={cards.find((c) => c.id === editingCardId)!}
+          onUpdate={handleUpdateCard}
+          onClose={() => setEditingCardId(null)}
         />
       )}
     </>
