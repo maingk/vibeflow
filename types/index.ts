@@ -12,6 +12,7 @@ export interface KanbanCard {
   priority?: Priority;
   tags?: string[];
   dueDate?: number;
+  assignee?: string;
 }
 
 export interface TodoItem {

@@ -2,7 +2,7 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Trash2, GripVertical, Flag, Clock, Calendar, AlertCircle, Copy, Edit2 } from "lucide-react";
+import { Trash2, GripVertical, Flag, Clock, Calendar, AlertCircle, Copy, Edit2, User, Tag as TagIcon } from "lucide-react";
 import { KanbanCard as KanbanCardType, Priority } from "@/types";
 
 const priorityStyles: Record<Priority, { color: string; bg: string }> = {
@@ -152,6 +152,29 @@ export function KanbanCard({ card, onDelete, onDuplicate, onEdit }: Props) {
           <p className="text-sm text-text-secondary leading-relaxed mb-3">
             {card.description}
           </p>
+        )}
+
+        {/* Assignee */}
+        {card.assignee && (
+          <div className="flex items-center gap-1.5 text-xs text-text-secondary mb-2">
+            <User size={12} className="text-[var(--gradient-cyan)]" />
+            <span className="font-medium">{card.assignee}</span>
+          </div>
+        )}
+
+        {/* Tags */}
+        {card.tags && card.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-2">
+            {card.tags.map((tag) => (
+              <span
+                key={tag}
+                className="inline-flex items-center gap-1 px-2 py-0.5 bg-[var(--gradient-magenta)]/10 text-[var(--gradient-magenta)] text-[10px] font-semibold rounded-md border border-[var(--gradient-magenta)]/20"
+              >
+                <TagIcon size={8} />
+                {tag}
+              </span>
+            ))}
+          </div>
         )}
       </div>
 

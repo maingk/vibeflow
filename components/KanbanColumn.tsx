@@ -104,6 +104,15 @@ export function KanbanColumn({ column, cards, onDeleteCard, onDuplicateCard, onE
           </div>
         )}
       </div>
+
+      {/* Add Card button - placed at top for easy access */}
+      <button
+        onClick={onAddCard}
+        className="group w-full mb-3 p-3 flex items-center justify-center gap-2 text-sm font-semibold text-text-secondary hover:text-text-primary glass border border-border/30 hover:border-[var(--gradient-cyan)]/30 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[var(--gradient-cyan)] focus:ring-offset-2 focus:ring-offset-surface font-mono uppercase tracking-wide"
+      >
+        <Plus size={16} className="group-hover:rotate-90 transition-transform duration-300" />
+        <span>Add Card</span>
+      </button>
       <div
         ref={setNodeRef}
         className="flex-1 min-h-[200px] rounded-xl p-3"
@@ -136,13 +145,6 @@ export function KanbanColumn({ column, cards, onDeleteCard, onDuplicateCard, onE
             </div>
           )}
         </SortableContext>
-        <button
-          onClick={onAddCard}
-          className="group w-full mt-3 p-3 flex items-center justify-center gap-2 text-sm font-semibold text-text-secondary hover:text-text-primary glass border border-border/30 hover:border-[var(--gradient-cyan)]/30 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[var(--gradient-cyan)] focus:ring-offset-2 focus:ring-offset-surface font-mono uppercase tracking-wide"
-        >
-          <Plus size={16} className="group-hover:rotate-90 transition-transform duration-300" />
-          <span>Add Card</span>
-        </button>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { X, Flag, Calendar } from "lucide-react";
+import { X, Flag, Calendar, User, Tag, Plus } from "lucide-react";
 import { KanbanCard, Priority } from "@/types";
 
 interface Props {
@@ -17,6 +17,9 @@ export function EditCardModal({ card, onUpdate, onClose }: Props) {
   const [dueDate, setDueDate] = useState<string>(
     card.dueDate ? new Date(card.dueDate).toISOString().split('T')[0] : ""
   );
+  const [assignee, setAssignee] = useState<string>(card.assignee || "");
+  const [tagInput, setTagInput] = useState<string>("");
+  const [tags, setTags] = useState<string[]>(card.tags || []);
   const inputRef = useRef<HTMLInputElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -54,8 +57,28 @@ export function EditCardModal({ card, onUpdate, onClose }: Props) {
         description: description.trim() || undefined,
         priority,
         dueDate: dueDateTimestamp,
+        assignee: assignee.trim() || undefined,
+        tags: tags.length > 0 ? tags : undefined,
       });
       onClose();
+    }
+  };
+
+  const addTag = () => {
+    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
+      setTags([...tags, tagInput.trim()]);
+      setTagInput("");
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setTags(tags.filter(tag => tag !== tagToRemove));
+  };
+
+  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addTag();
     }
   };
 
@@ -164,6 +187,65 @@ export function EditCardModal({ card, onUpdate, onClose }: Props) {
             </div>
             <div>
               <label className="block text-xs font-semibold text-text-secondary mb-2 uppercase tracking-wider font-mono">
+                <User size={12} className="inline mr-1" />
+                Assignee
+                <span className="text-text-secondary/50 ml-1 normal-case">(optional)</span>
+              </label>
+              <input
+                type="text"
+                value={assignee}
+                onChange={(e) => setAssignee(e.target.value)}
+                className="w-full bg-background/50 border border-border/30 rounded-xl px-4 py-2.5 text-sm text-text-primary placeholder:text-text-secondary/50 focus:outline-none focus:border-[var(--gradient-cyan)] focus:ring-2 focus:ring-[var(--gradient-cyan)]/30 transition-all"
+                placeholder="Enter name..."
+                autoComplete="off"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-text-secondary mb-2 uppercase tracking-wider font-mono">
+                <Tag size={12} className="inline mr-1" />
+                Tags
+                <span className="text-text-secondary/50 ml-1 normal-case">(optional)</span>
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={handleTagKeyDown}
+                  className="flex-1 bg-background/50 border border-border/30 rounded-xl px-4 py-2.5 text-sm text-text-primary placeholder:text-text-secondary/50 focus:outline-none focus:border-[var(--gradient-cyan)] focus:ring-2 focus:ring-[var(--gradient-cyan)]/30 transition-all"
+                  placeholder="Add tag and press Enter..."
+                  autoComplete="off"
+                />
+                <button
+                  type="button"
+                  onClick={addTag}
+                  className="px-4 py-2.5 bg-[var(--gradient-cyan)] hover:bg-[var(--gradient-cyan)]/80 text-white rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[var(--gradient-cyan)] focus:ring-offset-2 focus:ring-offset-background"
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
+              {tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center gap-1 px-2 py-1 bg-[var(--gradient-cyan)]/10 text-[var(--gradient-cyan)] text-xs rounded-md border border-[var(--gradient-cyan)]/20"
+                    >
+                      {tag}
+                      <button
+                        type="button"
+                        onClick={() => removeTag(tag)}
+                        className="hover:text-[var(--gradient-cyan)]/80 focus:outline-none"
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-text-secondary mb-2 uppercase tracking-wider font-mono">
                 <Calendar size={12} className="inline mr-1" />
                 Due Date
                 <span className="text-text-secondary/50 ml-1 normal-case">(optional)</span>
@@ -172,7 +254,8 @@ export function EditCardModal({ card, onUpdate, onClose }: Props) {
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
-                className="w-full bg-background/50 border border-border/30 rounded-xl px-4 py-2.5 text-sm text-text-primary focus:outline-none focus:border-[var(--gradient-cyan)] focus:ring-2 focus:ring-[var(--gradient-cyan)]/30 transition-all"
+                className="w-full bg-background/50 border border-border/30 rounded-xl px-4 py-2.5 text-sm text-text-primary focus:outline-none focus:border-[var(--gradient-cyan)] focus:ring-2 focus:ring-[var(--gradient-cyan)]/30 transition-all [color-scheme:dark]"
+                style={{ colorScheme: 'dark' }}
               />
             </div>
           </div>

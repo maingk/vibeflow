@@ -3,15 +3,17 @@
 import { CheckCircle2, ListTodo, Sun, Moon, Zap } from "lucide-react";
 import { DataManagement } from "./DataManagement";
 import { useTheme } from "@/contexts/ThemeContext";
+import { KanbanCard } from "@/types";
 
 interface HeaderProps {
   totalCards: number;
   completedCards: number;
   totalTodos: number;
   completedTodos: number;
+  cards: KanbanCard[];
 }
 
-export function Header({ totalCards, completedCards, totalTodos, completedTodos }: HeaderProps) {
+export function Header({ totalCards, completedCards, totalTodos, completedTodos, cards }: HeaderProps) {
   const { theme, toggleTheme } = useTheme();
 
   const cardProgress = totalCards > 0 ? (completedCards / totalCards) * 100 : 0;
@@ -108,7 +110,7 @@ export function Header({ totalCards, completedCards, totalTodos, completedTodos 
 
           <div className="h-8 w-[1px] bg-gradient-to-b from-transparent via-border to-transparent" />
 
-          <DataManagement />
+          <DataManagement cards={cards} />
 
           <div className="h-8 w-[1px] bg-gradient-to-b from-transparent via-border to-transparent" />
 

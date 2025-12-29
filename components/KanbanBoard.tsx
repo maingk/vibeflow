@@ -20,20 +20,38 @@ import { KanbanCard } from "./KanbanCard";
 import { AddCardModal } from "./AddCardModal";
 import { EditCardModal } from "./EditCardModal";
 import { SearchBar } from "./SearchBar";
-import { useKanban } from "@/hooks/useKanban";
 import { useToast } from "@/contexts/ToastContext";
-import { COLUMNS, ColumnId, KanbanCard as KanbanCardType } from "@/types";
+import { COLUMNS, ColumnId, KanbanCard as KanbanCardType, Priority } from "@/types";
 
 type SortOption = "date" | "priority" | "title" | "dueDate";
 
 interface Props {
   addCardTriggerRef?: React.MutableRefObject<(() => void) | null>;
   searchFocusRef?: React.MutableRefObject<(() => void) | null>;
+  cards: KanbanCardType[];
+  isLoaded: boolean;
+  addCard: (title: string, description: string, column: ColumnId, priority?: Priority, dueDate?: number, assignee?: string, tags?: string[]) => Promise<void>;
+  updateCard: (id: string, updates: Partial<Omit<KanbanCardType, "id" | "createdAt">>) => Promise<void>;
+  deleteCard: (id: string) => Promise<void>;
+  restoreCard: (card: KanbanCardType) => Promise<void>;
+  duplicateCard: (id: string) => Promise<void>;
+  moveCard: (cardId: string, toColumn: ColumnId, newOrder?: number) => Promise<void>;
+  getCardsByColumn: (columnId: ColumnId) => KanbanCardType[];
 }
 
-export function KanbanBoard({ addCardTriggerRef, searchFocusRef }: Props) {
-  const { cards, isLoaded, addCard, updateCard, deleteCard, restoreCard, duplicateCard, moveCard, getCardsByColumn } =
-    useKanban();
+export function KanbanBoard({
+  addCardTriggerRef,
+  searchFocusRef,
+  cards,
+  isLoaded,
+  addCard,
+  updateCard,
+  deleteCard,
+  restoreCard,
+  duplicateCard,
+  moveCard,
+  getCardsByColumn
+}: Props) {
   const { addToast } = useToast();
   const [activeCard, setActiveCard] = useState<KanbanCardType | null>(null);
   const [addingToColumn, setAddingToColumn] = useState<ColumnId | null>(null);

@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { X, Flag, Calendar } from "lucide-react";
+import { X, Flag, Calendar, User, Tag, Plus } from "lucide-react";
 import { ColumnId, Priority } from "@/types";
 
 interface Props {
   column: ColumnId;
-  onAdd: (title: string, description: string, column: ColumnId, priority?: Priority, dueDate?: number) => void;
+  onAdd: (title: string, description: string, column: ColumnId, priority?: Priority, dueDate?: number, assignee?: string, tags?: string[]) => void;
   onClose: () => void;
 }
 
@@ -15,6 +15,9 @@ export function AddCardModal({ column, onAdd, onClose }: Props) {
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<Priority | undefined>(undefined);
   const [dueDate, setDueDate] = useState<string>("");
+  const [assignee, setAssignee] = useState<string>("");
+  const [tagInput, setTagInput] = useState<string>("");
+  const [tags, setTags] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -47,8 +50,34 @@ export function AddCardModal({ column, onAdd, onClose }: Props) {
     e.preventDefault();
     if (title.trim()) {
       const dueDateTimestamp = dueDate ? new Date(dueDate).getTime() : undefined;
-      onAdd(title.trim(), description.trim(), column, priority, dueDateTimestamp);
+      onAdd(
+        title.trim(),
+        description.trim(),
+        column,
+        priority,
+        dueDateTimestamp,
+        assignee.trim() || undefined,
+        tags.length > 0 ? tags : undefined
+      );
       onClose();
+    }
+  };
+
+  const addTag = () => {
+    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
+      setTags([...tags, tagInput.trim()]);
+      setTagInput("");
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setTags(tags.filter(tag => tag !== tagToRemove));
+  };
+
+  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addTag();
     }
   };
 
@@ -157,6 +186,65 @@ export function AddCardModal({ column, onAdd, onClose }: Props) {
             </div>
             <div>
               <label className="block text-sm text-text-secondary mb-1.5">
+                <User size={12} className="inline mr-1" />
+                Assignee
+                <span className="text-text-secondary/50 ml-1">(optional)</span>
+              </label>
+              <input
+                type="text"
+                value={assignee}
+                onChange={(e) => setAssignee(e.target.value)}
+                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary/50 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/50 transition-colors"
+                placeholder="Enter name..."
+                autoComplete="off"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1.5">
+                <Tag size={12} className="inline mr-1" />
+                Tags
+                <span className="text-text-secondary/50 ml-1">(optional)</span>
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={handleTagKeyDown}
+                  className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary/50 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/50 transition-colors"
+                  placeholder="Add tag and press Enter..."
+                  autoComplete="off"
+                />
+                <button
+                  type="button"
+                  onClick={addTag}
+                  className="px-3 py-2 bg-accent hover:bg-accent-hover text-white rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-surface"
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
+              {tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center gap-1 px-2 py-1 bg-accent/10 text-accent text-xs rounded-md border border-accent/20"
+                    >
+                      {tag}
+                      <button
+                        type="button"
+                        onClick={() => removeTag(tag)}
+                        className="hover:text-accent-hover focus:outline-none"
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1.5">
                 <Calendar size={12} className="inline mr-1" />
                 Due Date
                 <span className="text-text-secondary/50 ml-1">(optional)</span>
@@ -165,7 +253,8 @@ export function AddCardModal({ column, onAdd, onClose }: Props) {
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
-                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/50 transition-colors"
+                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/50 transition-colors [color-scheme:dark]"
+                style={{ colorScheme: 'dark' }}
               />
             </div>
           </div>

@@ -33,6 +33,7 @@ export function useKanban() {
         priority: row.priority as KanbanCard["priority"] | undefined,
         tags: row.tags || undefined,
         dueDate: row.due_date || undefined,
+        assignee: row.assignee || undefined,
       }));
 
       setCards(transformedCards);
@@ -48,7 +49,9 @@ export function useKanban() {
       description: string,
       column: ColumnId = "todo",
       priority?: KanbanCard["priority"],
-      dueDate?: number
+      dueDate?: number,
+      assignee?: string,
+      tags?: string[]
     ) => {
       const newCard: KanbanCard = {
         id: crypto.randomUUID(),
@@ -59,6 +62,8 @@ export function useKanban() {
         createdAt: Date.now(),
         priority,
         dueDate,
+        assignee,
+        tags,
       };
 
       // Insert into database
@@ -72,6 +77,7 @@ export function useKanban() {
         priority: newCard.priority,
         tags: newCard.tags,
         due_date: newCard.dueDate,
+        assignee: newCard.assignee,
       });
 
       if (error) {
@@ -79,7 +85,31 @@ export function useKanban() {
         return;
       }
 
-      setCards((prev) => [...prev, newCard]);
+      // Reload all cards from database to ensure fresh state
+      const { data: reloadedData, error: reloadError } = await supabase
+        .from("cards")
+        .select("*")
+        .order("order_num", { ascending: true });
+
+      if (reloadError) {
+        console.error("Error reloading cards:", reloadError);
+        return;
+      }
+
+      const transformedCards = (reloadedData || []).map((row: any) => ({
+        id: row.id,
+        title: row.title,
+        description: row.description || undefined,
+        column: row.column_id as ColumnId,
+        order: row.order_num,
+        createdAt: row.created_at,
+        priority: row.priority as KanbanCard["priority"] | undefined,
+        tags: row.tags || undefined,
+        dueDate: row.due_date || undefined,
+        assignee: row.assignee || undefined,
+      }));
+
+      setCards(transformedCards);
     },
     []
   );
@@ -95,6 +125,7 @@ export function useKanban() {
       if (updates.priority !== undefined) dbUpdates.priority = updates.priority;
       if (updates.tags !== undefined) dbUpdates.tags = updates.tags;
       if (updates.dueDate !== undefined) dbUpdates.due_date = updates.dueDate;
+      if (updates.assignee !== undefined) dbUpdates.assignee = updates.assignee;
 
       const { error } = await supabase
         .from("cards")
@@ -169,6 +200,7 @@ export function useKanban() {
       priority: card.priority,
       tags: card.tags,
       due_date: card.dueDate,
+      assignee: card.assignee,
     });
 
     if (error) {
@@ -202,6 +234,7 @@ export function useKanban() {
         priority: duplicatedCard.priority,
         tags: duplicatedCard.tags,
         due_date: duplicatedCard.dueDate,
+        assignee: duplicatedCard.assignee,
       });
 
       if (error) {

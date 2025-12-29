@@ -1,14 +1,17 @@
 "use client";
 
 import { Download, Upload } from "lucide-react";
-import { useKanban } from "@/hooks/useKanban";
 import { useTodos } from "@/hooks/useTodos";
 import { useNotes } from "@/hooks/useNotes";
 import { useToast } from "@/contexts/ToastContext";
 import { useRef } from "react";
+import { KanbanCard } from "@/types";
 
-export function DataManagement() {
-  const { cards } = useKanban();
+interface Props {
+  cards: KanbanCard[];
+}
+
+export function DataManagement({ cards }: Props) {
   const { todos } = useTodos();
   const { notes } = useNotes();
   const { addToast } = useToast();
